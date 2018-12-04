@@ -1,0 +1,15 @@
+*.pyc
+.tox
+.eggs
+*.egg
+*.egg-info
+build
+dist
+*.zip
+.cache
+*.sw*
+*.log
+docs/build/html/*
+.coverage
+.mypy_cache/*
+.venv

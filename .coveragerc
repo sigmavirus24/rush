@@ -1,0 +1,11 @@
+[run]
+branch = True
+source =
+    rush
+
+
+[paths]
+source =
+    src/rush
+    .tox/*/lib/python*/site-packages/rush
+    .tox/pypy/site-packages/rush
