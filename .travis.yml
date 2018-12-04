@@ -1,0 +1,24 @@
+language: python
+cache: pip
+before_script:
+- pip install tox
+
+# test script
+script:  tox
+notifications:
+  on_success: change
+  on_failure: always
+
+matrix:
+  include:
+    - python: 3.6
+      env: TOXENV=py36
+    - python: 3.7
+      dist: xenial
+      sudo: true
+      env: TOXENV=py37
+    - python: 3.6
+      env: TOXENV=docs
+    - python: 3.7
+      env: TOXENV=lint
+           BLACK_ARGS='--check'
