@@ -22,3 +22,5 @@ matrix:
     - python: 3.7
       env: TOXENV=lint
            BLACK_ARGS='--check'
+      dist: xenial
+      sudo: true
