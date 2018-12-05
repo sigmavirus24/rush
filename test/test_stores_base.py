@@ -23,7 +23,9 @@ def test_get_with_time_must_be_implemented():
 
 def test_set_must_be_implemented():
     """Verify BaseStore.set raises NotImplementedError."""
-    _test_must_be_implemented(stores.BaseStore().set, tuple(), {"key": "key"})
+    _test_must_be_implemented(
+        stores.BaseStore().set, tuple(), {"key": "key", "data": {}}
+    )
 
 
 def test_set_with_time_must_be_implemented():
@@ -31,5 +33,5 @@ def test_set_with_time_must_be_implemented():
     _test_must_be_implemented(
         stores.BaseStore().set_with_time,
         tuple(),
-        {"key": "key", "time": datetime.datetime.now()},
+        {"key": "key", "time": datetime.datetime.now(), "data": {}},
     )
