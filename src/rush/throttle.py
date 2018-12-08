@@ -10,7 +10,7 @@ from rush import result
 class Throttle:
     """The class that acts as the primary interface for throttles."""
 
-    ratequota: quota.Quota = attr.ib()
+    rate: quota.Quota = attr.ib()
     limiter: limiters.BaseLimiter = attr.ib()
 
     def check(self, key: str, quantity: int) -> result.RateLimitResult:
@@ -23,7 +23,7 @@ class Throttle:
         :rtype:
             :class:`~rush.result.RateLimitResult
         """
-        return self.limiter.rate_limit(key, quantity, self.ratequota)
+        return self.limiter.rate_limit(key, quantity, self.rate)
 
     def clear(self, key: str) -> result.RateLimitResult:
         """Clear any existing limits for the given key.
@@ -34,7 +34,7 @@ class Throttle:
         :rtype:
             :class:`~rush.result.RateLimitResult
         """
-        return self.limiter.reset(key)
+        return self.limiter.reset(key, self.rate)
 
     def peek(self, key: str) -> result.RateLimitResult:
         """Peek at the user's current rate-limit usage.
@@ -49,4 +49,4 @@ class Throttle:
         :rtype:
             :class:`~rush.result.RateLimitResult
         """
-        return self.limiter.rate_limit(key, 0, self.ratequota)
+        return self.limiter.rate_limit(key, 0, self.rate)

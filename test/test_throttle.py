@@ -13,7 +13,7 @@ class TestThrottle:
         limiter = mock.Mock()
         quota = mock.Mock()
 
-        t = throttle.Throttle(ratequota=quota, limiter=limiter)
+        t = throttle.Throttle(rate=quota, limiter=limiter)
         t.check("key", 10)
 
         limiter.rate_limit.assert_called_once_with("key", 10, quota)
@@ -23,17 +23,17 @@ class TestThrottle:
         limiter = mock.Mock()
         quota = mock.Mock()
 
-        t = throttle.Throttle(ratequota=quota, limiter=limiter)
+        t = throttle.Throttle(rate=quota, limiter=limiter)
         t.clear("key")
 
-        limiter.reset.assert_called_once_with("key")
+        limiter.reset.assert_called_once_with("key", quota)
 
     def test_peek(self):
         """Verify what we call for the peek method."""
         limiter = mock.Mock()
         quota = mock.Mock()
 
-        t = throttle.Throttle(ratequota=quota, limiter=limiter)
+        t = throttle.Throttle(rate=quota, limiter=limiter)
         t.peek("key")
 
         limiter.rate_limit.assert_called_once_with("key", 0, quota)
