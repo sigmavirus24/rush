@@ -56,3 +56,11 @@ class TestQuota:
         """Verify that count must be greater than 0."""
         with pytest.raises(ValueError):
             quota.Quota(datetime.timedelta(seconds=1), 1, -1)
+
+    def test_calculates_limit_from_count_and_burst(self):
+        """Verify limit reflects both count and burst."""
+        q = quota.Quota(
+            period=datetime.timedelta(hours=1), count=5000, maximum_burst=500
+        )
+
+        assert q.limit == 5500

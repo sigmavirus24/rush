@@ -112,3 +112,8 @@ class Quota:
         """
         period = _one_day / count
         return cls(period=period, count=count)
+
+    @property
+    def limit(self) -> int:
+        """Return the calculated limit including maximum burst."""
+        return self.count + self.maximum_burst
