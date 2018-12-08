@@ -1,6 +1,6 @@
 """Logic for our ratelimit result."""
 import datetime
-from typing import Optional
+import typing
 
 import attr
 
@@ -56,7 +56,7 @@ class RateLimitResult:
         return datetime.datetime.now(datetime.timezone.utc)
 
     def resets_at(
-        self, from_when: Optional[datetime.datetime] = None
+        self, from_when: typing.Optional[datetime.datetime] = None
     ) -> datetime.datetime:
         """Calculate the reset time from UTC now.
 
@@ -69,7 +69,7 @@ class RateLimitResult:
         return from_when + self.reset_after
 
     def retry_at(
-        self, from_when: Optional[datetime.datetime] = None
+        self, from_when: typing.Optional[datetime.datetime] = None
     ) -> datetime.datetime:
         """Calculate the retry time from UTC now.
 
