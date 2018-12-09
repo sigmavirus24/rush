@@ -17,9 +17,7 @@ def _test_must_be_implemented(method, args, kwargs={}):
 @pytest.fixture
 def base_limiter():
     """Provide the instantiated BaseLimiter for testing."""
-    return limiters.BaseLimiter(
-        store=stores.BaseStore(), name="test-base-limiter"
-    )
+    return limiters.BaseLimiter(store=stores.BaseStore())
 
 
 def test_rate_limit_must_be_implemented(base_limiter):

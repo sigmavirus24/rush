@@ -14,7 +14,6 @@ class BaseLimiter:
     """Base object defining the interface for limiters."""
 
     store: stores.BaseStore = attr.ib()
-    name: str = attr.ib()
 
     def rate_limit(
         self, key: str, quantity: int, rate: quota.Quota
