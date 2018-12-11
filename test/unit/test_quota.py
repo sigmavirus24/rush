@@ -20,27 +20,25 @@ class TestQuota:
         """Verify we calculate our per second period correctly."""
         q = quota.Quota.per_second(6)
 
-        assert q.period == datetime.timedelta(
-            microseconds=MICROSECONDS_IN_A_SECOND / 6
-        )
+        assert q.period == datetime.timedelta(seconds=1)
 
     def test_per_minute(self):
         """Verify we calculate our per minute period correctly."""
         q = quota.Quota.per_minute(SECONDS_IN_A_MINUTE)
 
-        assert q.period == datetime.timedelta(seconds=1)
+        assert q.period == datetime.timedelta(seconds=60)
 
     def test_per_hour(self):
         """Verify we calculate our per hour period correctly."""
         q = quota.Quota.per_hour(SECONDS_IN_AN_HOUR)
 
-        assert q.period == datetime.timedelta(seconds=1)
+        assert q.period == datetime.timedelta(hours=1)
 
     def test_per_day(self):
         """Verify we calculate our per day period correctly."""
         q = quota.Quota.per_day(SECONDS_IN_A_DAY)
 
-        assert q.period == datetime.timedelta(seconds=1)
+        assert q.period == datetime.timedelta(days=1)
 
     def test_requires_a_positive_period(self):
         """Verify that period must have a time length greater than 0."""

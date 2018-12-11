@@ -68,8 +68,7 @@ class Quota:
         :rtype:
             :class:`~rush.throttle.Quota`
         """
-        period = _one_second / count
-        return cls(period=period, count=count)
+        return cls(period=_one_second, count=count)
 
     @classmethod
     def per_minute(cls: typing.Type[Q], count: int) -> Q:
@@ -82,8 +81,7 @@ class Quota:
         :rtype:
             :class:`~rush.throttle.Quota`
         """
-        period = _one_minute / count
-        return cls(period=period, count=count)
+        return cls(period=_one_minute, count=count)
 
     @classmethod
     def per_hour(cls: typing.Type[Q], count: int) -> Q:
@@ -96,8 +94,7 @@ class Quota:
         :rtype:
             :class:`~rush.throttle.Quota`
         """
-        period = _one_hour / count
-        return cls(period=period, count=count)
+        return cls(period=_one_hour, count=count)
 
     @classmethod
     def per_day(cls: typing.Type[Q], count: int) -> Q:
@@ -110,8 +107,7 @@ class Quota:
         :rtype:
             :class:`~rush.throttle.Quota`
         """
-        period = _one_day / count
-        return cls(period=period, count=count)
+        return cls(period=_one_day, count=count)
 
     @property
     def limit(self) -> int:
