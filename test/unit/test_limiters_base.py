@@ -4,6 +4,7 @@ import datetime
 import mock
 import pytest
 
+from rush import limit_data
 from rush import limiters
 from rush import result
 from rush import stores
@@ -36,7 +37,7 @@ def test_result_from_quota():
     limitresult = limiters.BaseLimiter.result_from_quota(
         rate=quota,
         limited=False,
-        limitdata={"remaining": 6},
+        limitdata=limit_data.LimitData(used=0, remaining=6),
         elapsed_since_period_start=datetime.timedelta(seconds=1),
     )
     assert isinstance(limitresult, result.RateLimitResult)
