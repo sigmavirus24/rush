@@ -8,6 +8,8 @@ from rush import limit_data
 from rush import quota
 from rush.limiters import periodic
 
+from . import helpers  # noqa: I100
+
 
 def new_quota(
     *, period=datetime.timedelta(seconds=1), count=5, maximum_burst=0
@@ -25,7 +27,7 @@ def new_quota(
 @pytest.fixture
 def limiter():
     """Provide instantiated periodic limiter."""
-    store = mock.Mock()
+    store = helpers.MockStore()
     return periodic.PeriodicLimiter(store=store)
 
 
@@ -35,7 +37,7 @@ class TestPeriodicLimiter:
     def test_reset(self, limiter):
         """Verify reset works appropriately."""
         rate = new_quota()
-        mockstore = limiter.store
+        mockstore = limiter.store.recording_store
 
         mockstore.set.return_value = limit_data.LimitData(remaining=5, used=0)
 
@@ -49,7 +51,7 @@ class TestPeriodicLimiter:
     def test_no_preexisting_limitdata(self, limiter):
         """Verify we do the right thing when a key's not been seen yet."""
         rate = new_quota()
-        mockstore = limiter.store
+        mockstore = limiter.store.recording_store
 
         mockstore.get.return_value = None
         limitresult = limiter.rate_limit(key="key", quantity=1, rate=rate)
@@ -62,7 +64,7 @@ class TestPeriodicLimiter:
     def test_preexisting_limitdata(self, limiter):
         """Verify we record the limit data appropriately."""
         rate = new_quota()
-        mockstore = limiter.store
+        mockstore = limiter.store.recording_store
         original_created_at = datetime.datetime.now(
             datetime.timezone.utc
         ) - datetime.timedelta(microseconds=1)
@@ -86,7 +88,7 @@ class TestPeriodicLimiter:
     def test_last_rate_limit_in_period(self, limiter):
         """Verify we allow the last request."""
         rate = new_quota()
-        mockstore = limiter.store
+        mockstore = limiter.store.recording_store
         original_created_at = datetime.datetime.now(
             datetime.timezone.utc
         ) - datetime.timedelta(microseconds=1)
@@ -110,7 +112,7 @@ class TestPeriodicLimiter:
     def test_rate_limit_exceeded_none_remaining(self, limiter):
         """Verify we allow the last request."""
         rate = new_quota()
-        mockstore = limiter.store
+        mockstore = limiter.store.recording_store
         original_created_at = datetime.datetime.now(
             datetime.timezone.utc
         ) - datetime.timedelta(microseconds=1)
@@ -128,7 +130,7 @@ class TestPeriodicLimiter:
     def test_rate_limit_reset_after_period(self, limiter):
         """Verify we allow the last request."""
         rate = new_quota()
-        mockstore = limiter.store
+        mockstore = limiter.store.recording_store
         now = datetime.datetime.now(datetime.timezone.utc)
         original_created_at = now - datetime.timedelta(seconds=2)
         mockstore.get.return_value = limit_data.LimitData(

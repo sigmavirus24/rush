@@ -13,7 +13,9 @@ from .. import stores
 class BaseLimiter:
     """Base object defining the interface for limiters."""
 
-    store: stores.BaseStore = attr.ib()
+    store: stores.BaseStore = attr.ib(
+        validator=attr.validators.instance_of(stores.BaseStore)
+    )
 
     def rate_limit(
         self, key: str, quantity: int, rate: quota.Quota
