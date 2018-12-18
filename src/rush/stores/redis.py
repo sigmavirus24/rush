@@ -48,6 +48,7 @@ class RedisStore(base.BaseStore):
     @client.default
     def _make_client(self):
         """Create the Redis client from the URL and config."""
+        self.client_config.setdefault("decode_responses", True)
         return redis.StrictRedis.from_url(
             url=self.url.unsplit(), **self.client_config
         )
