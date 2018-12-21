@@ -3,6 +3,7 @@ import datetime
 
 import mock
 
+from rush import quota
 from rush import stores
 
 
@@ -38,3 +39,16 @@ class MockStore(stores.BaseStore):
         if data:
             return data
         return super().set_with_time(key=key, data=data, time=time)
+
+
+def new_quota(
+    *, period=datetime.timedelta(seconds=1), count=5, maximum_burst=0
+):
+    """Generate quota mocks."""
+    return mock.Mock(
+        spec=quota.Quota,
+        period=period,
+        count=count,
+        maximum_burst=maximum_burst,
+        limit=(count + maximum_burst),
+    )
