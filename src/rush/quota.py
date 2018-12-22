@@ -58,7 +58,9 @@ class Quota:
             )
 
     @classmethod
-    def per_second(cls: typing.Type[Q], count: int, *, burst: int = 0) -> Q:
+    def per_second(
+        cls: typing.Type[Q], count: int, *, maximum_burst: int = 0
+    ) -> Q:
         """Create a quota based on the number allowed per second.
 
         :param int count:
@@ -68,10 +70,14 @@ class Quota:
         :rtype:
             :class:`~rush.throttle.Quota`
         """
-        return cls(period=_one_second, count=count, maximum_burst=burst)
+        return cls(
+            period=_one_second, count=count, maximum_burst=maximum_burst
+        )
 
     @classmethod
-    def per_minute(cls: typing.Type[Q], count: int, *, burst: int = 0) -> Q:
+    def per_minute(
+        cls: typing.Type[Q], count: int, *, maximum_burst: int = 0
+    ) -> Q:
         """Create a quota based on the number allowed per minute.
 
         :param int count:
@@ -81,10 +87,14 @@ class Quota:
         :rtype:
             :class:`~rush.throttle.Quota`
         """
-        return cls(period=_one_minute, count=count, maximum_burst=burst)
+        return cls(
+            period=_one_minute, count=count, maximum_burst=maximum_burst
+        )
 
     @classmethod
-    def per_hour(cls: typing.Type[Q], count: int, *, burst: int = 0) -> Q:
+    def per_hour(
+        cls: typing.Type[Q], count: int, *, maximum_burst: int = 0
+    ) -> Q:
         """Create a quota based on the number allowed per hour.
 
         :param int count:
@@ -94,10 +104,12 @@ class Quota:
         :rtype:
             :class:`~rush.throttle.Quota`
         """
-        return cls(period=_one_hour, count=count, maximum_burst=burst)
+        return cls(period=_one_hour, count=count, maximum_burst=maximum_burst)
 
     @classmethod
-    def per_day(cls: typing.Type[Q], count: int, *, burst: int = 0) -> Q:
+    def per_day(
+        cls: typing.Type[Q], count: int, *, maximum_burst: int = 0
+    ) -> Q:
         """Create a quota based on the number allowed per day.
 
         :param int count:
@@ -107,7 +119,7 @@ class Quota:
         :rtype:
             :class:`~rush.throttle.Quota`
         """
-        return cls(period=_one_day, count=count, maximum_burst=burst)
+        return cls(period=_one_day, count=count, maximum_burst=maximum_burst)
 
     @property
     def limit(self) -> int:

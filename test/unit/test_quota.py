@@ -18,28 +18,28 @@ class TestQuota:
 
     def test_per_second(self):
         """Verify we calculate our per second period correctly."""
-        q = quota.Quota.per_second(6, burst=1)
+        q = quota.Quota.per_second(6, maximum_burst=1)
 
         assert q.period == datetime.timedelta(seconds=1)
         assert q.limit == 7
 
     def test_per_minute(self):
         """Verify we calculate our per minute period correctly."""
-        q = quota.Quota.per_minute(SECONDS_IN_A_MINUTE, burst=1)
+        q = quota.Quota.per_minute(SECONDS_IN_A_MINUTE, maximum_burst=1)
 
         assert q.period == datetime.timedelta(seconds=60)
         assert q.limit == 61
 
     def test_per_hour(self):
         """Verify we calculate our per hour period correctly."""
-        q = quota.Quota.per_hour(SECONDS_IN_AN_HOUR, burst=1)
+        q = quota.Quota.per_hour(SECONDS_IN_AN_HOUR, maximum_burst=1)
 
         assert q.period == datetime.timedelta(hours=1)
         assert q.limit == 3601
 
     def test_per_day(self):
         """Verify we calculate our per day period correctly."""
-        q = quota.Quota.per_day(SECONDS_IN_A_DAY, burst=1)
+        q = quota.Quota.per_day(SECONDS_IN_A_DAY, maximum_burst=1)
 
         assert q.period == datetime.timedelta(days=1)
         assert q.limit == 86401
