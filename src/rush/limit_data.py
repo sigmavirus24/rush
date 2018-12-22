@@ -43,7 +43,12 @@ class LimitData:
         return datetime.datetime.now(datetime.timezone.utc)
 
     def asdict(self) -> typing.Dict[str, str]:
-        """Return the data as a dictionary."""
+        """Return the data as a dictionary.
+
+        :returns:
+            A dictionary mapping the attributes to string representations
+            of the values.
+        """
         time = ""
         if self.time is not None:
             time = self.time.strftime(DATETIME_FORMAT)
@@ -69,6 +74,7 @@ class LimitData:
         :param datetime.datetime created_at:
         :param datetime.datetime time:
         :returns:
+            A new copy of this instance with the overridden values.
         :rtype:
             :class:`~rush.stores.base.LimitData`
         """
