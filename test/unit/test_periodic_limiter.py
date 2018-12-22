@@ -5,6 +5,7 @@ import mock
 import pytest
 
 from rush import limit_data
+from rush import result
 from rush.limiters import periodic
 
 from . import helpers  # noqa: I100,I202
@@ -133,3 +134,51 @@ class TestPeriodicLimiter:
         assert limitresult.limited is False
         mockstore.get.assert_called_once_with("key")
         mockstore.set.assert_called_once_with(key="key", data=mock.ANY)
+
+    def test_result_from_quota(self, limiter):
+        """Verify the behaviour of result_from_quota."""
+        quota = mock.Mock(count=5, period=datetime.timedelta(hours=1))
+        limitresult = limiter.result_from_quota(
+            rate=quota,
+            limited=False,
+            limitdata=limit_data.LimitData(used=0, remaining=6),
+            elapsed_since_period_start=datetime.timedelta(seconds=1),
+        )
+        assert isinstance(limitresult, result.RateLimitResult)
+        assert limitresult.limited is False
+        assert limitresult.limit == 5
+        assert limitresult.remaining == 6
+        assert limitresult.retry_after == datetime.timedelta(seconds=-1)
+
+    def test_result_from_quota_when_limited(self, limiter):
+        """Verify the behaviour of result_from_quota."""
+        quota = mock.Mock(count=5, period=datetime.timedelta(hours=1))
+        limitresult = limiter.result_from_quota(
+            rate=quota,
+            limited=True,
+            limitdata=limit_data.LimitData(used=6, remaining=0),
+            elapsed_since_period_start=datetime.timedelta(seconds=1),
+        )
+        assert isinstance(limitresult, result.RateLimitResult)
+        assert limitresult.limited is True
+        assert limitresult.limit == 5
+        assert limitresult.remaining == 0
+        assert limitresult.retry_after == datetime.timedelta(
+            minutes=59, seconds=59
+        )
+
+    def test_result_from_quota_explicitly_passed(self, limiter):
+        """Verify the behaviour of result_from_quota."""
+        quota = mock.Mock(count=5, period=datetime.timedelta(hours=1))
+        limitresult = limiter.result_from_quota(
+            rate=quota,
+            limited=True,
+            limitdata=limit_data.LimitData(used=6, remaining=0),
+            elapsed_since_period_start=datetime.timedelta(seconds=1),
+            retry_after=datetime.timedelta(seconds=1),
+        )
+        assert isinstance(limitresult, result.RateLimitResult)
+        assert limitresult.limited is True
+        assert limitresult.limit == 5
+        assert limitresult.remaining == 0
+        assert limitresult.retry_after == datetime.timedelta(seconds=1)
