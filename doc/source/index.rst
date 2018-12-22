@@ -96,3 +96,4 @@ Table of Contents
    throttles
    limiters
    storage
+   releases/index

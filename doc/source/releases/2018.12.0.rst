@@ -1,0 +1,16 @@
+====================================
+ 2018.12.0 - Released on 2018-12-22
+====================================
+
+This is the initial release of the rush library. It includes a rough API for
+using different rate limiting algorithms with storage backends. It aims to
+provide a composable set of algorithms and storage backends for use when
+rate-limiting (or throttling) activities. This release includes support for:
+
+- Periodic Rate Limiting
+
+- Generic Cell Rate Limiting
+
+- Redis Storage
+
+- In-memory Python Dictionary Storage
