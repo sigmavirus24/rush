@@ -30,6 +30,17 @@ It also has a base class so you can create your own.
    number of requests they can make.  This means that even as time moves, your
    users can still make requests instead of waiting terribly long.
 
+   Example instantiation:
+
+   .. code-block:: python
+
+      from rush.limiters import gcra
+      from rush.stores import dictionary
+
+      gcralimiter = gcra.GenericCellRatelimiter(
+         store=dictionary.DictionaryStore()
+      )
+
 .. class:: rush.limiters.periodic.PeriodicLimiter
 
    This class uses a naive way of allowing a certain number of requests for
@@ -39,6 +50,17 @@ It also has a base class so you can create your own.
    say a user makes a request at 12:31:50 until 12:32:50, they would only have
    59 requests remaining.  If by 12:32:10 the user has made 60 requests, then
    they still have to wait until 12:32:50 before they can make more.
+
+   Example instantiation:
+
+   .. code-block:: python
+
+      from rush.limiters import periodic
+      from rush.stores import dictionary
+
+      periodiclimiter = periodic.PeriodicLimiter(
+         store=dictionary.DictionaryStore()
+      )
 
 
 Writing Your Own Algorithm
