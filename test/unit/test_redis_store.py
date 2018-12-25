@@ -1,4 +1,5 @@
 """Unit tests for storing limit data in Redis."""
+import datetime
 
 import mock
 import pytest
@@ -87,3 +88,18 @@ class TestRedisStore:
 
         assert data is None
         client.hgetall.assert_called_once_with("test_key")
+
+    def test_current_time_uses_redis_time(self):
+        """Verify we retrieve the current time from Redis."""
+        url = "redis://"
+        client = mock.Mock()
+        client.time.return_value = (1_545_740_827, 608_937)
+        store = redstore.RedisStore(url=url, client=client)
+
+        now = store.current_time()
+
+        assert isinstance(now, datetime.datetime)
+        assert now == datetime.datetime(
+            2018, 12, 25, 12, 27, 7, 608_937, tzinfo=datetime.timezone.utc
+        )
+        client.time.assert_called_once_with()

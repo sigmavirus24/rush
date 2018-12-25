@@ -28,9 +28,9 @@ class BaseStore:
         """Retrieve the data for a given key and include its time."""
         data = self.get(key)
         if data is None:
-            return datetime.datetime.now(tzinfo), None
+            return self.current_time(tzinfo), None
         if data.time is None:
-            data = data.copy_with(time=datetime.datetime.now())
+            data = data.copy_with(time=self.current_time())
         tzaware_dt = data.time.astimezone(tzinfo)  # type: ignore
         data = data.copy_with(time=tzaware_dt)
         return tzaware_dt, data
@@ -47,3 +47,20 @@ class BaseStore:
         if data.time is None:
             data = data.copy_with(time=time)
         return self.set(key=key, data=data)
+
+    def current_time(
+        self, tzinfo: typing.Optional[datetime.tzinfo] = datetime.timezone.utc
+    ) -> datetime.datetime:
+        """Return the curent date and time as a datetime.
+
+        Stores are encouraged to override this to provide the time based on
+        the backing store's potentially more consistent clock.
+
+        The default is to use the local clock.
+
+        :returns:
+            Now in UTC
+        :retype:
+            :class:`~datetime.datetime`
+        """
+        return datetime.datetime.now(tzinfo)

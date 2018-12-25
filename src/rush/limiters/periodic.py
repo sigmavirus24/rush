@@ -21,7 +21,7 @@ class PeriodicLimiter(base.BaseLimiter):
         self, key: str, quantity: int, rate: quota.Quota
     ) -> result.RateLimitResult:
         """Apply the rate-limit to a quantity of requests."""
-        now = datetime.datetime.now(datetime.timezone.utc)
+        now = self.store.current_time()
         limitdata = self.store.get(key) or _fresh_limitdata(rate, now)
 
         elapsed_time = now - limitdata.created_at
@@ -56,9 +56,7 @@ class PeriodicLimiter(base.BaseLimiter):
 
     def reset(self, key: str, rate: quota.Quota) -> result.RateLimitResult:
         """Reset the rate-limit for a given key."""
-        data = _fresh_limitdata(
-            rate, datetime.datetime.now(datetime.timezone.utc)
-        )
+        data = _fresh_limitdata(rate, self.store.current_time())
         limitdata = self.store.set(key=key, data=data)
         return self.result_from_quota(
             rate=rate,

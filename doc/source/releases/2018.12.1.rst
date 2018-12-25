@@ -1,0 +1,10 @@
+====================================
+ 2018.12.1 - Released on 2018-12-25
+====================================
+
+I realized I missed one crucial thing for production usage.
+
+Bugs Fixed
+==========
+
+- Rely on stores to set the current time and provide the clock for limiters.

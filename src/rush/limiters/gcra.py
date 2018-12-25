@@ -24,7 +24,7 @@ class GenericCellRatelimiter(base.BaseLimiter):
         # The increment uses the emission interval to find out how much time
         # quantity should have been issued over
         increment: datetime.timedelta = emission_interval * quantity
-        now = datetime.datetime.now(datetime.timezone.utc)
+        now = self.store.current_time()
         data = self.store.get(key)
         # tat is short for theoretical arrival time, we store this as
         # "time" on our limit data
@@ -84,7 +84,7 @@ class GenericCellRatelimiter(base.BaseLimiter):
 
     def reset(self, key: str, rate: quota.Quota) -> result.RateLimitResult:
         """Reset the rate-limit for a given key."""
-        now = datetime.datetime.now(datetime.timezone.utc)
+        now = self.store.current_time()
         reset_tat = now - (rate.period * 2)
         data = limit_data.LimitData(
             used=0, remaining=rate.limit, created_at=now, time=reset_tat

@@ -1,4 +1,5 @@
 """Redis storage logic."""
+import datetime
 import typing
 
 import attr
@@ -64,3 +65,20 @@ class RedisStore(base.BaseStore):
         """Retrieve the data for a given key."""
         data = self.client.hgetall(key)
         return limit_data.LimitData(**data) if data else None
+
+    def current_time(
+        self, tzinfo: typing.Optional[datetime.tzinfo] = datetime.timezone.utc
+    ) -> datetime.datetime:
+        """Return the curent date and time as a datetime.
+
+        This uses Redis's ``TIME`` command to determine the current time.
+
+        :returns:
+            Now in UTC
+        :retype:
+            :class:`~datetime.datetime`
+        """
+        seconds, microseconds = self.client.time()
+        return datetime.datetime.utcfromtimestamp(
+            seconds + (microseconds / 1_000_000)
+        ).replace(tzinfo=tzinfo)

@@ -42,3 +42,12 @@ def test_get_with_time():
         assert data is None
         assert isinstance(time, datetime.datetime)
         get.assert_called_once_with("key")
+
+
+def test_current_time():
+    """Verify we default to the local clock."""
+    store = stores.BaseStore()
+    with mock.patch("datetime.datetime") as dt:
+        store.current_time()
+
+    dt.now.assert_called_once_with(datetime.timezone.utc)
