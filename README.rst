@@ -2,6 +2,8 @@
  rush: A library for throttles
 ===============================
 
+|build-status| |coverage-status| |docs|
+
 This library is a small collection of algorithms that can be reused
 when throttling user interactions with a resource (e.g., an API).
 
@@ -84,5 +86,14 @@ Contributing
 
 .. _Code of Conduct:
    ./CODE_OF_CONDUCT.txt
+.. |build-status| image:: https://travis-ci.org/sigmavirus24/rush.svg?branch=master&style=flat
+   :target: https://travis-ci.org/sigmavirus24/rush
+   :alt: Build status
+.. |coverage-status| image:: http://codecov.io/github/sigmavirus24/rush/coverage.svg?branch=master
+   :target: http://codecov.io/github/sigmavirus24/rush?branch=master
+   :alt: Test coverage
+.. |docs| image:: https://readthedocs.org/projects/rush/badge/?version=latest&style=flat
+   :target: http://rush.readthedocs.io/
+   :alt: Documentation
 
 .. vim:set tw=72
