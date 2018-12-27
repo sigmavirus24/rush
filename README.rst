@@ -2,11 +2,11 @@
  rush: A library for throttles
 ===============================
 
-This library is intended to be a collection of algorithms that can be reused
+This library is a small collection of algorithms that can be reused
 when throttling user interactions with a resource (e.g., an API).
 
-This library is still a work in progress. See goals for what we're striving
-for.
+This library strives to allow any limiter and backing store to be used
+together without needing to be worried about potential compatibility.
 
 
 Installation
@@ -16,14 +16,13 @@ Installation
 
    pip install rush
 
+.. code::
 
-Goals
-=====
+   pipenv install rush
 
-Below is the project's list of goals broken down by category
 
 Features
---------
+========
 
 - A basic periodic interval rate limiter - N accesses per period of time. An
   example would be the GitHub API that limits authenticated users to 5,000
@@ -35,10 +34,14 @@ Features
 - A Redis storage backend for rate limit results so that users can have state
   persisted across machines and application restarts.
 
-- A Redis GCRA implementation, likely borrowed from Ruby's `redis-gcra`_ gem.
+- A in-memory dictionary storage backend for quick prototyping and testing.
+
+- Type annotations built into the library, verified with mypy, and distributed
+  to users.
+
 
 Quality
--------
+=======
 
 - 100% test coverage
 
@@ -53,17 +56,33 @@ Quality
 
 - Complete documentation linted by doclint and strictly compiled by Sphinx
 
-Design
-------
 
-- Composable - ability to confidently use one algorithmic limiter with any
-  properly written storage backend
+Contributing
+============
 
-- Easy to understand - hopefully it will be easy to understand how the library
-  works because of how composable it will be
+- All contributors are expected to read and follow our `Code of Conduct`_.
+
+- To reduce the initial friction of submitting a pull request:
+
+   - Please run ``tox`` prior to submitting your pull request.
+
+   - After a commit, please run ``tox -e commitlint``.
+
+- To make it easier to support you, please gather the following information
+  prior to filing an issue:
+
+   - How you installed ``rush`` and the versions of its dependencies (if
+     you're using the Redis store, please include ``rfc3986`` and ``redis``
+     version information).
+
+   - What stores and limiters are you using?
+
+   - An example that reproduces your problem
 
 
 .. links
 
-.. _redis-gcra:
-  https://github.com/rwz/redis-gcra/tree/master/vendor
+.. _Code of Conduct:
+   ./CODE_OF_CONDUCT.txt
+
+.. vim:set tw=72
