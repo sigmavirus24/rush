@@ -96,4 +96,5 @@ Table of Contents
    throttles
    limiters
    storage
+   examples
    releases/index

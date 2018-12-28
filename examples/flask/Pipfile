@@ -1,0 +1,26 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+flake8 = "*"
+black = "*"
+flake8-import-order = "*"
+flake8-docstrings = "*"
+pytest = "*"
+pytest-flask = "*"
+flake8-colors = "*"
+
+[packages]
+flask = "*"
+rush = {extras = ["redis"],version = "*"}
+structlog = "*"
+limiterapp = {editable = true,path = "."}
+gunicorn = "*"
+
+[requires]
+python_version = "3.6"
+
+[pipenv]
+allow_prereleases = true
