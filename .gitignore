@@ -13,4 +13,5 @@ docs/build/html/*
 .coverage
 .mypy_cache/*
 .venv
+.env
 t.py
