@@ -18,6 +18,16 @@ class BaseStore:
         """Store the values for a given key."""
         raise NotImplementedError()
 
+    def compare_and_swap(
+        self,
+        *,
+        key: str,
+        old: typing.Optional[limit_data.LimitData],
+        new: limit_data.LimitData,
+    ) -> limit_data.LimitData:
+        """Perform an atomic compare-and-swap (CAS) for a given key."""
+        raise NotImplementedError()
+
     def get_with_time(
         self,
         key: str,

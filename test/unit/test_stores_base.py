@@ -34,6 +34,27 @@ def test_set_must_be_implemented():
     )
 
 
+def test_compare_and_swap_must_be_implemented():
+    """Verify BaseStore.compare_and_swap raises NotImplementedError."""
+    _test_must_be_implemented(
+        stores.BaseStore().compare_and_swap,
+        tuple(),
+        {
+            "key": "key",
+            "old": limit_data.LimitData(
+                used=0,
+                remaining=1,
+                created_at=datetime.datetime.now(datetime.timezone.utc),
+            ),
+            "new": limit_data.LimitData(
+                used=0,
+                remaining=1,
+                created_at=datetime.datetime.now(datetime.timezone.utc),
+            ),
+        },
+    )
+
+
 def test_get_with_time():
     """Verify we handle BaseStore.get returning None."""
     store = stores.BaseStore()

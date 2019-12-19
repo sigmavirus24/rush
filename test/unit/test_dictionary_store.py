@@ -1,6 +1,9 @@
 """Tests for our dictionary store."""
 import datetime
 
+import pytest
+
+from rush import exceptions
 from rush import limit_data
 from rush.stores import dictionary as dictstore
 
@@ -95,3 +98,71 @@ class TestDictionaryStore:
         dt, retrieved_data = store.get_with_time("mykey")
         assert dt == data.time
         assert retrieved_data == data
+
+    def test_compare_and_swap_success(self):
+        """Verify success when old is the same as new."""
+        data = limit_data.LimitData(
+            used=9999,
+            remaining=1,
+            time=datetime.datetime(
+                year=2018,
+                month=12,
+                day=4,
+                hour=9,
+                minute=0,
+                second=0,
+                tzinfo=datetime.timezone.utc,
+            ),
+        )
+        key = "mykey"
+        store = dictstore.DictionaryStore(store={key: data})
+
+        new_data = limit_data.LimitData(
+            used=10000,
+            remaining=0,
+            time=datetime.datetime(
+                year=2018,
+                month=12,
+                day=4,
+                hour=9,
+                minute=0,
+                second=0,
+                tzinfo=datetime.timezone.utc,
+            ),
+        )
+        res = store.compare_and_swap(key=key, old=data, new=new_data)
+        assert res == new_data
+
+    def test_compare_and_swap_failure(self):
+        """Verify correct exception raised when old is not the same as new."""
+        data = limit_data.LimitData(
+            used=9999,
+            remaining=1,
+            time=datetime.datetime(
+                year=2018,
+                month=12,
+                day=4,
+                hour=9,
+                minute=0,
+                second=0,
+                tzinfo=datetime.timezone.utc,
+            ),
+        )
+        key = "mykey"
+        store = dictstore.DictionaryStore(store={key: data})
+
+        new_data = limit_data.LimitData(
+            used=10000,
+            remaining=0,
+            time=datetime.datetime(
+                year=2018,
+                month=12,
+                day=4,
+                hour=9,
+                minute=0,
+                second=0,
+                tzinfo=datetime.timezone.utc,
+            ),
+        )
+        with pytest.raises(exceptions.CompareAndSwapError):
+            store.compare_and_swap(key=key, old=new_data, new=new_data)

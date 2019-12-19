@@ -13,7 +13,13 @@ class MockStore(stores.BaseStore):
     def __init__(self, recording_store=None):
         """Set up our mocked out store."""
         self.recording_store = recording_store or mock.Mock(
-            spec=["get", "get_with_time", "set", "set_with_time"]
+            spec=[
+                "get",
+                "get_with_time",
+                "set",
+                "set_with_time",
+                "compare_and_swap",
+            ]
         )
 
     def get(self, key):
@@ -39,6 +45,12 @@ class MockStore(stores.BaseStore):
         if data:
             return data
         return super().set_with_time(key=key, data=data, time=time)
+
+    def compare_and_swap(self, key, old, new):
+        """Mock compare_and_swap call."""
+        return self.recording_store.compare_and_swap(
+            key=key, old=old, new=new
+        )
 
 
 def new_quota(

@@ -3,6 +3,7 @@ import datetime
 
 import pytest
 
+from rush import exceptions as rexc
 from rush import limit_data
 from rush.limiters import gcra
 
@@ -112,3 +113,28 @@ class TestGenericCellRatelimiter:
             < limitresult.retry_after
             <= datetime.timedelta(seconds=3)
         )
+
+    def test_ratelimit_cas_failure(self, limiter):
+        """Verify correct exception is raise when CAS cannot be performed."""
+        rate = helpers.new_quota(
+            period=datetime.timedelta(seconds=60), count=50
+        )
+        mockstore = limiter.store.recording_store
+        mockstore.get.side_effect = lambda key: (
+            limit_data.LimitData(
+                used=49,
+                remaining=1,
+                created_at=datetime.datetime.now(datetime.timezone.utc),
+                time=(
+                    datetime.datetime.now(datetime.timezone.utc)
+                    + datetime.timedelta(seconds=60)
+                ),
+            )
+        )
+        mockstore.compare_and_swap.side_effect = rexc.CompareAndSwapError(
+            "Test exception",
+            limitdata=limit_data.LimitData(used=0, remaining=0),
+        )
+
+        with pytest.raises(rexc.CompareAndSwapError):
+            limiter.rate_limit(key="key", rate=rate, quantity=1)
