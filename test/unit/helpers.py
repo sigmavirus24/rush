@@ -11,7 +11,7 @@ class MockStore(stores.BaseStore):
     """Mock out the BaseStore to pass isinstance checks."""
 
     def __init__(self, recording_store=None):
-        """Set-up our mocked out store."""
+        """Set up our mocked out store."""
         self.recording_store = recording_store or mock.Mock(
             spec=["get", "get_with_time", "set", "set_with_time"]
         )
