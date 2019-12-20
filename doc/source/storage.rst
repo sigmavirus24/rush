@@ -9,6 +9,8 @@ By default, rush includes the following storage backend:
 - :class:`In Memory Python Dictionary
   <rush.stores.dictionary.DictionaryStore>`
 
+- :class:`In Memory TLRUCache <rush.stores.local.TLRUCacheStore>`
+
 - :class:`Redis <rush.stores.redis.RedisStore>`
 
 It also has a base class so you can create your own.
@@ -23,6 +25,32 @@ It also has a base class so you can create your own.
 
       This is not suggested for use outside of testing and initial proofs of
       concept.
+
+
+.. class:: rush.stores.local.TLRUCacheStore
+
+   This class requires a maximum size and a default TTL.
+
+   .. note::
+
+      This store requires installing rush with the "local" extra, e.g.,
+
+      .. code::
+
+         pip install -U rush[local]
+
+   Example usage looks like:
+
+   .. code-block:: python
+
+      from datetime import timedelta
+
+      from rush.stores import local
+
+      s = local.TLRUCacheStore(
+         maxsize=128,
+         ttl=timedelta(hours=6)
+      )
 
 
 .. class:: rush.stores.redis.RedisStore
