@@ -57,8 +57,8 @@ class TestRedisStore:
 
         store.set(key="test_key", data=data)
 
-        client.hmset.assert_called_once_with(
-            "test_key", {"remaining": "4", "used": "1"}
+        client.set.assert_called_once_with(
+            "test_key", '{"remaining": "4", "used": "1"}'
         )
 
     def test_get(self):
@@ -66,28 +66,27 @@ class TestRedisStore:
         url = "redis://"
         client = mock.Mock()
         store = redstore.RedisStore(url=url, client=client)
-        client.hgetall.return_value = {
-            "remaining": "4",
-            "used": "1",
-            "created_at": "2018-12-11T12:12:15.123456+0000",
-        }
+        client.get.return_value = (
+            '{"remaining": "4", "used": "1", '
+            + '"created_at": "2018-12-11T12:12:15.123456+0000"}'
+        )
 
         data = store.get("test_key")
 
         assert isinstance(data, limit_data.LimitData)
-        client.hgetall.assert_called_once_with("test_key")
+        client.get.assert_called_once_with("test_key")
 
     def test_get_returns_none(self):
         """Verify we use the right method on our client to retrive data."""
         url = "redis://"
         client = mock.Mock()
         store = redstore.RedisStore(url=url, client=client)
-        client.hgetall.return_value = {}
+        client.get.return_value = None
 
         data = store.get("test_key")
 
         assert data is None
-        client.hgetall.assert_called_once_with("test_key")
+        client.get.assert_called_once_with("test_key")
 
     def test_current_time_uses_redis_time(self):
         """Verify we retrieve the current time from Redis."""

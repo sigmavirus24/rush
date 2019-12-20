@@ -1,5 +1,6 @@
 """Redis storage logic."""
 import datetime
+import json
 import typing
 
 import attr
@@ -59,13 +60,49 @@ class RedisStore(base.BaseStore):
         self, *, key: str, data: limit_data.LimitData
     ) -> limit_data.LimitData:
         """Store the values for a given key."""
-        self.client.hmset(key, data.asdict())
+        self.client.set(key, json.dumps(data.asdict()))
         return data
 
     def get(self, key: str) -> typing.Optional[limit_data.LimitData]:
         """Retrieve the data for a given key."""
-        data = self.client.hgetall(key)
-        return limit_data.LimitData(**data) if data else None
+        data = self.client.get(key)
+        return limit_data.LimitData(**json.loads(data)) if data else None
+
+    def compare_and_swap(
+        self,
+        *,
+        key: str,
+        old: typing.Optional[limit_data.LimitData],
+        new: limit_data.LimitData,
+    ) -> limit_data.LimitData:
+        """Perform an atomic compare-and-swap (CAS) for a given key."""
+        with self.client.pipeline() as pipe:
+            try:
+                # put a WATCH on the key that holds our sequence value
+                pipe.watch(key)
+                # after WATCHing, the pipeline is put into immediate execution
+                # mode until we tell it to start buffering commands again.
+                # this allows us to get the current value
+                cur = pipe.get(key)  # Gives str or None
+                cur = limit_data.LimitData(**json.loads(cur)) if cur else None
+
+                if cur == old:
+                    # now we can put the pipeline back into buffered mode
+                    # with MULTI
+                    pipe.multi()
+                    pipe.set(key, json.dumps(new.asdict()))
+                    # and finally, execute the pipeline (the set command)
+                    pipe.execute()
+                    return new
+                # if a WatchError wasn't raised during execution, everything
+                # we just did happened atomically.
+            except redis.WatchError:
+                # another client must have changed 'key' between the time we
+                # started WATCHing it and the pipeline's execution.
+                pass
+        raise exceptions.CompareAndSwapError(
+            "Old LimitData did not match current LimitData", limitdata=cur,
+        )
 
     def current_time(
         self, tzinfo: typing.Optional[datetime.tzinfo] = datetime.timezone.utc
