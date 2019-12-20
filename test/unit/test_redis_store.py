@@ -1,5 +1,6 @@
 """Unit tests for storing limit data in Redis."""
 import datetime
+import json
 
 import mock
 import pytest
@@ -102,3 +103,102 @@ class TestRedisStore:
             2018, 12, 25, 12, 27, 7, 608_937, tzinfo=datetime.timezone.utc
         )
         client.time.assert_called_once_with()
+
+    def test_compare_and_swap_success(self):
+        """Verify success when old is the same as new."""
+        url = "redis://"
+        client = mock.Mock()
+
+        data = limit_data.LimitData(
+            used=9999,
+            remaining=1,
+            time=datetime.datetime(
+                year=2018,
+                month=12,
+                day=4,
+                hour=9,
+                minute=0,
+                second=0,
+                tzinfo=datetime.timezone.utc,
+            ),
+        )
+        pipe = mock.Mock()
+        pipe.get.return_value = json.dumps(data.asdict())
+        client.pipeline.return_value = mock.Mock()
+        client.pipeline.return_value.__enter__ = mock.Mock(return_value=pipe)
+        client.pipeline.return_value.__exit__ = mock.Mock(return_value=None)
+        store = redstore.RedisStore(url=url, client=client)
+
+        key = "mykey"
+        new_data = limit_data.LimitData(
+            used=10000,
+            remaining=0,
+            time=datetime.datetime(
+                year=2018,
+                month=12,
+                day=4,
+                hour=9,
+                minute=0,
+                second=0,
+                tzinfo=datetime.timezone.utc,
+            ),
+        )
+        res = store.compare_and_swap(key=key, old=data, new=new_data)
+        assert res == new_data
+
+    def test_compare_and_swap_failure(self):
+        """Verify correct exception raised when old is not the same as new."""
+        url = "redis://"
+        client = mock.Mock()
+        data = limit_data.LimitData(
+            used=9999,
+            remaining=1,
+            time=datetime.datetime(
+                year=2018,
+                month=12,
+                day=4,
+                hour=9,
+                minute=0,
+                second=0,
+                tzinfo=datetime.timezone.utc,
+            ),
+        )
+        pipe = mock.Mock()
+        pipe.get.return_value = json.dumps(data.asdict())
+        client.pipeline.return_value = mock.Mock()
+        client.pipeline.return_value.__enter__ = mock.Mock(return_value=pipe)
+        client.pipeline.return_value.__exit__ = mock.Mock(return_value=None)
+        store = redstore.RedisStore(url=url, client=client)
+
+        key = "mykey"
+        with pytest.raises(rexc.CompareAndSwapError):
+            store.compare_and_swap(key=key, old=None, new=data)
+
+    def test_compare_and_swap_watch_exception(self):
+        """Verify correct exception raised when old is not the same as new."""
+        url = "redis://"
+        client = mock.Mock()
+        data = limit_data.LimitData(
+            used=9999,
+            remaining=1,
+            time=datetime.datetime(
+                year=2018,
+                month=12,
+                day=4,
+                hour=9,
+                minute=0,
+                second=0,
+                tzinfo=datetime.timezone.utc,
+            ),
+        )
+        pipe = mock.Mock()
+        pipe.get.return_value = json.dumps(data.asdict())
+        pipe.execute.side_effect = redis.WatchError()
+        client.pipeline.return_value = mock.Mock()
+        client.pipeline.return_value.__enter__ = mock.Mock(return_value=pipe)
+        client.pipeline.return_value.__exit__ = mock.Mock(return_value=None)
+        store = redstore.RedisStore(url=url, client=client)
+
+        key = "mykey"
+        with pytest.raises(rexc.CompareAndSwapError):
+            store.compare_and_swap(key=key, old=data, new=data)
