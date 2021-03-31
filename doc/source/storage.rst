@@ -62,7 +62,8 @@ Rush specifies a small set of methods that a backend needs to implement.
 .. class:: rush.stores.base.BaseStore
 
    Users must inherit from this class to implement their own Storage Backend.
-   Users must define ``set`` and ``get`` methods with the following signatures:
+   Users must define ``compare_and_swap``, ``set``, and ``get`` methods with
+   the following signatures:
 
    .. code-block:: python
 
@@ -73,6 +74,17 @@ Rush specifies a small set of methods that a backend needs to implement.
           self, *, key: str, data: limit_data.LimitData
       ) -> limit_data.LimitData:
           pass
+
+      def compare_and_swap(
+          self,
+          *,
+          key: str,
+          old: typing.Optional[limit_data.LimitData],
+          new: limit_data.LimitData,
+      ) -> limit_data.LimitData:
+        pass
+
+  ``compare_and_swap`` must be atomic.
 
 
 The way these methods communicate data back and forth between the backend and

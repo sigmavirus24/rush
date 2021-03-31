@@ -72,7 +72,7 @@ class GenericCellRatelimiter(base.BaseLimiter):
                 used=used, remaining=remaining, created_at=now, time=new_time
             )
 
-        self.store.set(key=key, data=limitdata)
+        self.store.compare_and_swap(key=key, old=data, new=limitdata)
 
         return result.RateLimitResult(
             limit=rate.count,

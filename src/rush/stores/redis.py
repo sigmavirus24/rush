@@ -52,8 +52,36 @@ class RedisStore(base.BaseStore):
         attr.validate(self)  # Force validation of self.url
         self.client_config.setdefault("decode_responses", True)
         return redis.StrictRedis.from_url(
-            url=self.url.unsplit(), **self.client_config
+            url=self.url.unsplit(),
+            **self.client_config,
         )
+
+    def compare_and_swap(
+        self,
+        key: str,
+        old: typing.Optional[limit_data.LimitData],
+        new: limit_data.LimitData,
+    ) -> limit_data.LimitData:
+        """Perform an atomic compare and swap operation."""
+        with self.client.pipeline() as p:
+            try:
+                p.watch(key)
+                data = p.hgetall(key)
+                current_data = limit_data.LimitData(**data) if data else None
+                if old != current_data:
+                    raise exceptions.MismatchedDataError(
+                        "old limit data did not match expected limit data",
+                        expected_limit_data=old,
+                        actual_limit_data=current_data,
+                    )
+                p.multi()
+                p.hmset(key, new.asdata())
+                p.execute()
+            except redis.WatchError as we:
+                raise exceptions.DataChangedInStoreError(
+                    "error swapping the limit data", original_exception=we
+                )
+        return new
 
     def set(
         self, *, key: str, data: limit_data.LimitData

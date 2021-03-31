@@ -1,6 +1,6 @@
 """A periodic limiter working from the quota's period."""
 import datetime
-import typing
+import typing as t
 
 from . import base
 from .. import limit_data
@@ -22,17 +22,19 @@ class PeriodicLimiter(base.BaseLimiter):
     ) -> result.RateLimitResult:
         """Apply the rate-limit to a quantity of requests."""
         now = self.store.current_time()
-        limitdata = self.store.get(key) or _fresh_limitdata(rate, now)
+        olddata = self.store.get(key)
 
-        elapsed_time = now - limitdata.created_at
+        elapsed_time = now - (olddata.created_at if olddata else now)
 
-        if rate.period > elapsed_time and (
-            limitdata.remaining == 0 or limitdata.remaining < quantity
+        if (
+            rate.period > elapsed_time
+            and olddata is not None
+            and (olddata.remaining == 0 or olddata.remaining < quantity)
         ):
             return self.result_from_quota(
                 rate=rate,
                 limited=True,
-                limitdata=limitdata,
+                limitdata=olddata or _fresh_limitdata(rate, now),
                 elapsed_since_period_start=elapsed_time,
             )
 
@@ -41,11 +43,12 @@ class PeriodicLimiter(base.BaseLimiter):
             limitdata = _fresh_limitdata(rate, now, used=quantity)
             limitdata = self.store.set(key=key, data=limitdata)
         else:
-            limitdata = limitdata.copy_with(
-                remaining=(limitdata.remaining - quantity),
-                used=(limitdata.used + quantity),
+            copy_from = olddata or _fresh_limitdata(rate, now)
+            limitdata = copy_from.copy_with(
+                remaining=(copy_from.remaining - quantity),
+                used=(copy_from.used + quantity),
             )
-            self.store.set(key=key, data=limitdata)
+            self.store.compare_and_swap(key=key, old=olddata, new=limitdata)
 
         return self.result_from_quota(
             rate=rate,
@@ -71,7 +74,7 @@ class PeriodicLimiter(base.BaseLimiter):
         limited: bool,
         limitdata: limit_data.LimitData,
         elapsed_since_period_start: datetime.timedelta,
-        retry_after: typing.Optional[datetime.timedelta] = None,
+        retry_after: t.Optional[datetime.timedelta] = None,
     ) -> result.RateLimitResult:
         """Generate the RateLimitResult for a given set of parameters.
 

@@ -55,7 +55,7 @@ class TestPeriodicLimiter:
         original_created_at = datetime.datetime.now(
             datetime.timezone.utc
         ) - datetime.timedelta(microseconds=1)
-        mockstore.get.return_value = limit_data.LimitData(
+        olddata = mockstore.get.return_value = limit_data.LimitData(
             remaining=4, used=1, created_at=original_created_at
         )
 
@@ -65,9 +65,10 @@ class TestPeriodicLimiter:
         assert limitresult.limit == 5
         assert limitresult.limited is False
         mockstore.get.assert_called_once_with("key")
-        mockstore.set.assert_called_once_with(
+        mockstore.compare_and_swap.assert_called_once_with(
             key="key",
-            data=limit_data.LimitData(
+            old=olddata,
+            new=limit_data.LimitData(
                 used=2, remaining=3, created_at=original_created_at
             ),
         )
@@ -79,7 +80,7 @@ class TestPeriodicLimiter:
         original_created_at = datetime.datetime.now(
             datetime.timezone.utc
         ) - datetime.timedelta(microseconds=1)
-        mockstore.get.return_value = limit_data.LimitData(
+        olddata = mockstore.get.return_value = limit_data.LimitData(
             remaining=1, used=4, created_at=original_created_at
         )
 
@@ -89,9 +90,10 @@ class TestPeriodicLimiter:
         assert limitresult.limit == 5
         assert limitresult.limited is False
         mockstore.get.assert_called_once_with("key")
-        mockstore.set.assert_called_once_with(
+        mockstore.compare_and_swap.assert_called_once_with(
             key="key",
-            data=limit_data.LimitData(
+            old=olddata,
+            new=limit_data.LimitData(
                 used=5, remaining=0, created_at=original_created_at
             ),
         )

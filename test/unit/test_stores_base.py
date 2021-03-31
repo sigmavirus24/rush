@@ -34,6 +34,19 @@ def test_set_must_be_implemented():
     )
 
 
+def test_compare_and_swap():
+    """Verify BaseStore.compare_and_swap raises NotImplementedError."""
+    _test_must_be_implemented(
+        stores.BaseStore().compare_and_swap,
+        tuple(),
+        {
+            "key": "key",
+            "old": None,
+            "new": None,
+        },
+    )
+
+
 def test_get_with_time():
     """Verify we handle BaseStore.get returning None."""
     store = stores.BaseStore()

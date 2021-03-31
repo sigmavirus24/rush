@@ -7,6 +7,9 @@ By default, rush includes the following algorithms:
 - :class:`Generic Cell Rate Limiting
   <rush.limiters.gcra.GenericCellRatelimiter>`
 
+- :class:`Redis Lua Generic Cell rate Limiting 
+  <rush.limiters.redis_gcra.GenericCellRatelimiter>`
+
 - :class:`Periodic <rush.limiters.periodic.PeriodicLimiter>`
 
 It also has a base class so you can create your own.
@@ -39,6 +42,43 @@ It also has a base class so you can create your own.
 
       gcralimiter = gcra.GenericCellRatelimiter(
          store=dictionary.DictionaryStore()
+      )
+
+.. class:: rush.limiters.redis_gcra.GenericCellRatelimiter
+
+   This class implements a very specific type of "`leaky bucket`_" designed
+   for Asynchronous Transfor Mode networks called `Generic Cell Rate
+   Algorithm`_.  The algorithm itself can be challenging to understand, so
+   let's first cover the benefits:
+
+   - It doesn't require users to sit idle for a potentially long period of
+     time while they wait for their period to be done.
+
+   - It leaks the used amount of resources based off a clock and requires no
+     extra threads, processes, or some other process to leak things.
+
+   - It is fast, even implemented purely in Python.
+
+   This can be thought of as having a sliding window where users have some
+   number of requests they can make.  This means that even as time moves, your
+   users can still make requests instead of waiting terribly long.
+
+   This relies on Lua scripts that are loaded into Redis (and only compatible
+   with Redis) and called from Python. The Lua scripts are borrowed from
+   https://github.com/rwz/redis-gcra
+
+   Since this is implemented *only* for Redis this requires you to use
+   :class:`~rush.stores.redis.RedisStore`.
+
+   Example instantiation:
+
+   .. code-block:: python
+
+      from rush.limiters import redis_gcra
+      from rush.stores import redis
+
+      gcralimiter = redis_gcra.GenericCellRatelimiter(
+         store=redis.RedisStore("redis://localhost:6379")
       )
 
 .. class:: rush.limiters.periodic.PeriodicLimiter

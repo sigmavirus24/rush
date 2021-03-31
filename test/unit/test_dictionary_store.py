@@ -1,6 +1,9 @@
 """Tests for our dictionary store."""
 import datetime
 
+import pytest
+
+from rush import exceptions
 from rush import limit_data
 from rush.stores import dictionary as dictstore
 
@@ -95,3 +98,38 @@ class TestDictionaryStore:
         dt, retrieved_data = store.get_with_time("mykey")
         assert dt == data.time
         assert retrieved_data == data
+
+    def test_compare_and_swap_raises_mismatched_data_error(self):
+        data = limit_data.LimitData(
+            used=9999,
+            remaining=1,
+            time=datetime.datetime(
+                year=2018,
+                month=12,
+                day=4,
+                hour=9,
+                minute=0,
+                second=0,
+                tzinfo=datetime.timezone.utc,
+            ),
+        )
+        store = dictstore.DictionaryStore(
+            store={
+                "mykey": data.copy_with(
+                    used=10000,
+                    remaining=0,
+                    time=datetime.datetime(
+                        year=2018,
+                        month=12,
+                        day=4,
+                        hour=9,
+                        minute=0,
+                        second=1,
+                        tzinfo=datetime.timezone.utc,
+                    ),
+                )
+            }
+        )
+
+        with pytest.raises(exceptions.MismatchedDataError):
+            store.compare_and_swap("mykey", old=data, new=data)
