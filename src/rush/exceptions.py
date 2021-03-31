@@ -1,4 +1,5 @@
 """Exceptions for the rush library."""
+from rush import result
 
 
 class RushError(Exception):
@@ -40,3 +41,12 @@ class InvalidRedisURL(RedisStoreError):
         super().__init__(message)
         self.url = url
         self.error = error
+
+
+class ThrottleExceeded(Exception):
+    """The rate-limit has been exceeded."""
+
+    def __init__(self, message, *, result: result.RateLimitResult) -> None:
+        """Handle extra arguments for easier access by users."""
+        super().__init__(message)
+        self.result = result
