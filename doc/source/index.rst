@@ -94,8 +94,8 @@ Table of Contents
    :maxdepth: 2
 
    throttles
-   decorators
    limiters
    storage
+   contrib
    examples
    releases/index

@@ -7,9 +7,9 @@ import typing
 
 import attr
 
-from rush import exceptions as rexc
-from rush import result as res
-from rush import throttle as thr
+from rush import exceptions
+from rush import result
+from rush import throttle as _throttle
 
 
 @attr.s
@@ -25,12 +25,12 @@ class ThrottleDecorator:
         decorated functions.
     """
 
-    throttle: thr.Throttle = attr.ib()
+    throttle: _throttle.Throttle = attr.ib()
 
-    def _check(self, key: str, thr: thr.Throttle) -> res.RateLimitResult:
+    def _check(self, key: str) -> result.RateLimitResult:
         result = self.throttle.check(key=key, quantity=1)
         if result.limited:
-            raise rexc.ThrottleExceeded("Rate-limit exceeded", result=result)
+            raise ThrottleExceeded("Rate-limit exceeded", result=result)
         return result
 
     def __call__(self, func: typing.Callable) -> typing.Callable:
@@ -60,9 +60,9 @@ class ThrottleDecorator:
                 :param kwargs:
                     keyworded arguments to pass to the decorated function.
                 :raises:
-                    `~rush.exceptions.ThrottleExceeded`
+                    `~rush.contrib.decorator.ThrottleExceeded`
                 """
-                self._check(key=key, thr=self.throttle)
+                self._check(key=key)
                 return await func(*args, **kwargs)
 
         else:
@@ -81,9 +81,9 @@ class ThrottleDecorator:
                 :param kwargs:
                     keyworded arguments to pass to the decorated function.
                 :raises:
-                    `~rush.exceptions.ThrottleExceeded`
+                    `~rush.contrib.decorator.ThrottleExceeded`
                 """
-                self._check(key=key, thr=self.throttle)
+                self._check(key=key)
                 return func(*args, **kwargs)
 
         return wrapper
@@ -106,7 +106,7 @@ class ThrottleDecorator:
                 """Perform naive sleep and retry strategy.
 
                 Call the throttled function. If the function raises a
-                `ThrottleExceeded` exception sleep for the recommended
+                ``ThrottleExceeded`` exception sleep for the recommended
                 time and retry.
 
                 :param args:
@@ -117,7 +117,7 @@ class ThrottleDecorator:
                 while True:
                     try:
                         return await throttled_func(*args, **kwargs)
-                    except rexc.ThrottleExceeded as e:
+                    except ThrottleExceeded as e:
                         await asyncio.sleep(
                             e.result.retry_after.total_seconds()
                         )
@@ -129,7 +129,7 @@ class ThrottleDecorator:
                 """Perform naive sleep and retry strategy.
 
                 Call the throttled function. If the function raises a
-                `ThrottleExceeded` exception sleep for the recommended
+                ``ThrottleExceeded`` exception sleep for the recommended
                 time and retry.
 
                 :param args:
@@ -140,7 +140,16 @@ class ThrottleDecorator:
                 while True:
                     try:
                         return throttled_func(*args, **kwargs)
-                    except rexc.ThrottleExceeded as e:
+                    except ThrottleExceeded as e:
                         time.sleep(e.result.retry_after.total_seconds())
 
         return wrapper
+
+
+class ThrottleExceeded(exceptions.RushError):
+    """The rate-limit has been exceeded."""
+
+    def __init__(self, message, *, result: result.RateLimitResult) -> None:
+        """Handle extra arguments for easier access by users."""
+        super().__init__(message)
+        self.result = result

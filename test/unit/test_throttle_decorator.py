@@ -5,8 +5,7 @@ import datetime
 import mock
 import pytest
 
-from rush import decorator
-from rush import exceptions
+from rush.contrib import decorator
 
 
 class TestThrottleDecorator:
@@ -36,7 +35,7 @@ class TestThrottleDecorator:
         def test_func():
             return True
 
-        with pytest.raises(exceptions.ThrottleExceeded):
+        with pytest.raises(decorator.ThrottleExceeded):
             test_func()
 
     def test_call_async_non_limited(self):
@@ -65,7 +64,7 @@ class TestThrottleDecorator:
             return True
 
         loop = asyncio.get_event_loop()
-        with pytest.raises(exceptions.ThrottleExceeded):
+        with pytest.raises(decorator.ThrottleExceeded):
             loop.run_until_complete(test_func())
 
     def test_sleep_and_retry_sync(self):
