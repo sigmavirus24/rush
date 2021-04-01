@@ -87,7 +87,16 @@ class RedisStore(base.BaseStore):
         self, *, key: str, data: limit_data.LimitData
     ) -> limit_data.LimitData:
         """Store the values for a given key."""
-        self.client.hmset(key, data.asdict())
+        datadict = typing.cast(  # Cast until the stubs are fixed
+            typing.Mapping[
+                typing.Union[bytes, float, int, str],
+                typing.Union[bytes, float, int, str],
+            ],
+            # See also https://stackoverflow.com/a/64484841/1953283 as an
+            # explanation of why the redis-py typeshed stubs are wrong
+            data.asdict(),
+        )
+        self.client.hmset(key, datadict)
         return data
 
     def get(self, key: str) -> typing.Optional[limit_data.LimitData]:

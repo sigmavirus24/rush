@@ -124,8 +124,8 @@ class ThrottleDecorator:
 
         else:
 
-            @functools.wraps(throttled_func)
-            def wrapper(*args, **kwargs) -> typing.Callable:
+            @functools.wraps(func)
+            def wrapper(*args, **kwargs) -> typing.Callable:  # type: ignore
                 """Perform naive sleep and retry strategy.
 
                 Call the throttled function. If the function raises a
