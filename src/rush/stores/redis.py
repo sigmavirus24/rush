@@ -75,7 +75,7 @@ class RedisStore(base.BaseStore):
                         actual_limit_data=current_data,
                     )
                 p.multi()
-                p.hmset(key, new.asdata())
+                p.hmset(key, new.asdict())
                 p.execute()
             except redis.WatchError as we:
                 raise exceptions.DataChangedInStoreError(

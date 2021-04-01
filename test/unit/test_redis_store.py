@@ -4,6 +4,7 @@ import datetime
 import mock
 import pytest
 import redis
+import redis.client
 import rfc3986
 
 from rush import exceptions as rexc
@@ -103,3 +104,49 @@ class TestRedisStore:
             2018, 12, 25, 12, 27, 7, 608_937, tzinfo=datetime.timezone.utc
         )
         client.time.assert_called_once_with()
+
+    def test_compare_and_set(self):
+        """Verify we call the right things for atomic operation."""
+        pipeline = mock.MagicMock(autospec=redis.client.Pipeline)
+        pipeline.__enter__.return_value = pipeline
+        client = mock.Mock()
+        client.pipeline.return_value = pipeline
+        pipeline.hgetall.return_value = {}
+        data = limit_data.LimitData(used=5, remaining=10)
+        store = redstore.RedisStore(url="redis://", client=client)
+
+        store.compare_and_swap("key", old=None, new=data)
+        assert client.pipeline.call_count == 1
+        pipeline.watch.assert_called_once_with("key")
+        pipeline.hgetall.assert_called_once_with("key")
+        pipeline.multi.assert_called_once_with()
+        pipeline.hmset.assert_called_once_with("key", data.asdict())
+        pipeline.execute.assert_called_once_with()
+
+    def test_compare_and_set_raises_mismatched_data_error(self):
+        """Verify we avoid setting data when we can't verify the old state."""
+        pipeline = mock.MagicMock(autospec=redis.client.Pipeline)
+        pipeline.__enter__.return_value = pipeline
+        client = mock.Mock()
+        client.pipeline.return_value = pipeline
+        pipeline.hgetall.return_value = {"used": 5, "remaining": 10}
+        old = limit_data.LimitData(used=4, remaining=11)
+        new = limit_data.LimitData(used=5, remaining=10)
+        store = redstore.RedisStore(url="redis://", client=client)
+
+        with pytest.raises(rexc.MismatchedDataError):
+            store.compare_and_swap("key", old=old, new=new)
+
+    def test_compare_and_set_raises_data_changed_in_store_error(self):
+        """Verify we avoid setting data when we can't verify the old state."""
+        pipeline = mock.MagicMock(autospec=redis.client.Pipeline)
+        pipeline.__enter__.return_value = pipeline
+        client = mock.Mock()
+        client.pipeline.return_value = pipeline
+        pipeline.hgetall.side_effect = redis.WatchError("'key' changed")
+        old = limit_data.LimitData(used=4, remaining=11)
+        new = limit_data.LimitData(used=5, remaining=10)
+        store = redstore.RedisStore(url="redis://", client=client)
+
+        with pytest.raises(rexc.DataChangedInStoreError):
+            store.compare_and_swap("key", old=old, new=new)
