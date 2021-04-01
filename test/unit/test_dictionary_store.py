@@ -100,6 +100,7 @@ class TestDictionaryStore:
         assert retrieved_data == data
 
     def test_compare_and_swap_raises_mismatched_data_error(self):
+        """Verify the fact that we check current data against old data."""
         data = limit_data.LimitData(
             used=9999,
             remaining=1,

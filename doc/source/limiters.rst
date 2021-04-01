@@ -7,7 +7,7 @@ By default, rush includes the following algorithms:
 - :class:`Generic Cell Rate Limiting
   <rush.limiters.gcra.GenericCellRatelimiter>`
 
-- :class:`Redis Lua Generic Cell rate Limiting 
+- :class:`Redis Lua Generic Cell rate Limiting
   <rush.limiters.redis_gcra.GenericCellRatelimiter>`
 
 - :class:`Periodic <rush.limiters.periodic.PeriodicLimiter>`
