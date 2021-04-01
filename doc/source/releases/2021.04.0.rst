@@ -1,0 +1,35 @@
+====================================
+ 2021.04.0 - Released on 2021-04-01
+====================================
+
+
+Backwards Incompatibilities
+===========================
+
+- Add ``compare_and_swap`` method to Base store definition for atomic
+  operations.
+
+  This allows limiters to ensure there are no race-conditions by having the
+  stores provide atomic interfaces.  See also
+  :class:`~rush.stores.base.BaseStore`.
+
+
+Bugs Fixed
+==========
+
+- Update built-in limiters to rely on ``compare_and_swap`` method from storage
+  backends.
+
+
+Features
+========
+
+- Add a decorator in ``rush.contrib.decorator`` written by `Jude188`_ for
+  potentially easier use of the library.  See also
+  :class:`~rush.contrib.decorator.ThrottleDecorator`.
+
+
+.. links
+
+.. _Jude188:
+    https://github.com/Jude188

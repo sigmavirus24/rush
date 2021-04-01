@@ -1,3 +1,3 @@
 """Rush is a library for throttling algorithms."""
 
-__version__ = "2018.12.1"
+__version__ = "2021.04.0"
